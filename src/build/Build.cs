@@ -28,6 +28,7 @@ class Build : FalloutBuild
 
     AbcVersion AbcVersion => AbcVersionFactory
         .CreateOneBuilder()
+        .SetRepositoryRoot(RootDirectory)
         .SetDateTime(BuildDate)
         .UseLogger(new LogImplementation(Log.Logger))
         .Build();

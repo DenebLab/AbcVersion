@@ -1,0 +1,66 @@
+name: Publish NuGet Package
+
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    branches:
+      - production
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Important for version calculation
+    
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Install AbcVersion tool
+      run: dotnet tool install --global Deneblab.AbcVersionCmd
+        
+    - name: Get version
+      id: get_version
+      run: |
+          VERSION=$(abcversion -p semversion)
+          #VERSION=1.0.90
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using version: $VERSION"
+    
+    - name: Restore AbcVersion project
+      run: dotnet restore src/AbcVersion/AbcVersion.csproj /p:TargetFramework=net8.0
+    
+    - name: Build AbcVersion project
+      run: dotnet build src/AbcVersion/AbcVersion.csproj --configuration Release /p:TargetFramework=net8.0 /p:Version=${{ steps.get_version.outputs.version }}
+    
+    - name: Restore solution
+      run: dotnet restore src/AbcVersion/AbcVersion.csproj
+    
+    - name: Build solution
+      run: dotnet build src/AbcVersion/AbcVersion.csproj --configuration Release /p:TargetFramework=net8.0 /p:Version=${{ steps.get_version.outputs.version }}
+    - name: Test
+      run: dotnet test src/AbcVersion/AbcVersion.csproj --no-restore --verbosity normal /p:TargetFramework=net8.0
+    
+    - name: Pack NuGet package
+      if: github.event_name == 'push'
+      run: |
+        dotnet pack src/AbcVersion/AbcVersion.csproj \
+          --configuration Release \
+          --no-build \
+          /p:TargetFramework=net8.0 \
+          --output nupkgs \
+         /p:Version=${{ steps.get_version.outputs.version }}
+    
+    - name: Push to NuGet
+      if: github.event_name == 'push'
+      run: |
+        dotnet nuget push nupkgs/*.nupkg \
+          --api-key ${{ secrets.NUGET_API_KEY }} \
+          --source https://api.nuget.org/v3/index.json 

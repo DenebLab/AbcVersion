@@ -1,0 +1,114 @@
+name: Publish GitHub Release (native binaries)
+
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    branches:
+      - production
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            asset_name: abcversion-linux-x64
+            output_name: Deneblab.AbcVersionCmd
+          - os: windows-latest
+            rid: win-x64
+            asset_name: abcversion-win-x64.exe
+            output_name: Deneblab.AbcVersionCmd.exe
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Important for version calculation
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          10.0.x
+
+    - name: Install Native AOT prerequisites (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang zlib1g-dev
+
+    - name: Install AbcVersion tool
+      shell: bash
+      run: dotnet tool install --global Deneblab.AbcVersionCmd
+
+    - name: Get version
+      id: get_version
+      shell: bash
+      run: |
+        VERSION=$(abcversion -p semversion)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Using version: $VERSION"
+
+    - name: Build native AOT binary
+      shell: bash
+      run: ./build.sh --target GithubRelease --rid ${{ matrix.rid }}
+
+    - name: Stage release asset
+      shell: bash
+      run: |
+        mkdir -p staging
+        cp ".fallout/temp/w/AbcVersion.Cmd/github-release/${{ matrix.rid }}/${{ matrix.output_name }}" \
+          "staging/${{ matrix.asset_name }}"
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.asset_name }}
+        path: staging/${{ matrix.asset_name }}
+        if-no-files-found: error
+
+  release:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # Important for version calculation
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Install AbcVersion tool
+      run: dotnet tool install --global Deneblab.AbcVersionCmd
+
+    - name: Get version
+      id: get_version
+      run: |
+        VERSION=$(abcversion -p semversion)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Using version: $VERSION"
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: release-assets
+        merge-multiple: true
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        name: v${{ steps.get_version.outputs.version }}
+        files: release-assets/*

@@ -1,5 +1,13 @@
 # AbcVersion
 
+[![Publish NuGet Package](https://github.com/deneblab/abcversion/actions/workflows/nuget-package.yml/badge.svg?branch=production)](https://github.com/deneblab/abcversion/actions/workflows/nuget-package.yml)
+[![NuGet library](https://img.shields.io/nuget/v/Deneblab.AbcVersion?label=NuGet%20library)](https://www.nuget.org/packages/Deneblab.AbcVersion)
+[![dotnet tool](https://img.shields.io/nuget/v/Deneblab.AbcVersionCmd?label=dotnet%20tool)](https://www.nuget.org/packages/Deneblab.AbcVersionCmd)
+[![Downloads](https://img.shields.io/nuget/dt/Deneblab.AbcVersionCmd?label=downloads)](https://www.nuget.org/packages/Deneblab.AbcVersionCmd)
+[![Release](https://img.shields.io/github/v/release/deneblab/abcversion)](https://github.com/deneblab/abcversion/releases/latest)
+[![License](https://img.shields.io/github/license/deneblab/abcversion)](LICENSE)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+
 Automatic semantic versioning for .NET projects based on Git history. AbcVersion calculates version numbers from your repository's commit history and branch configuration — no manual version bumps needed.
 
 Available as both a **CLI tool** and a **NuGet library** targeting .NET 8.0.

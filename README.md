@@ -22,14 +22,14 @@ Every push to `production` publishes self-contained Native AOT binaries as GitHu
 ```bash
 # linux-x64
 curl -fsSL -o abcversion \
-  https://github.com/DenebLab/AbcVersion/releases/latest/download/abcversion-linux-x64
+  https://github.com/deneblab/abcversion/releases/latest/download/abcversion-linux-x64
 chmod +x abcversion
 ./abcversion -p semversion
 ```
 
 ```powershell
 # win-x64
-Invoke-WebRequest -Uri https://github.com/DenebLab/AbcVersion/releases/latest/download/abcversion-win-x64.exe -OutFile abcversion.exe
+Invoke-WebRequest -Uri https://github.com/deneblab/abcversion/releases/latest/download/abcversion-win-x64.exe -OutFile abcversion.exe
 .\abcversion.exe -p semversion
 ```
 
@@ -39,7 +39,7 @@ Invoke-WebRequest -Uri https://github.com/DenebLab/AbcVersion/releases/latest/do
 FROM alpine:3.20 AS abcversion
 RUN apk add --no-cache curl && \
     curl -fsSL -o /usr/local/bin/abcversion \
-      https://github.com/DenebLab/AbcVersion/releases/latest/download/abcversion-linux-x64 && \
+      https://github.com/deneblab/abcversion/releases/latest/download/abcversion-linux-x64 && \
     chmod +x /usr/local/bin/abcversion
 
 FROM your-base-image AS build
@@ -53,7 +53,7 @@ RUN abcversion -p semversion
 - name: Install abcversion (native, no .NET SDK needed)
   run: |
     curl -fsSL -o /usr/local/bin/abcversion \
-      https://github.com/DenebLab/AbcVersion/releases/latest/download/abcversion-linux-x64
+      https://github.com/deneblab/abcversion/releases/latest/download/abcversion-linux-x64
     chmod +x /usr/local/bin/abcversion
 - name: Get version
   id: get_version

@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/github/license/deneblab/abcversion)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
 
-Automatic semantic versioning for .NET projects based on Git history. AbcVersion calculates version numbers from your repository's commit history and branch configuration — no manual version bumps needed.
+Automatic semantic versioning for .NET projects based on Git history. AbcVersion calculates version numbers from your repository's commit history and branch configuration - no manual version bumps needed.
 
 Available as both a **CLI tool** and a **NuGet library** targeting .NET 8.0.
 
@@ -25,7 +25,7 @@ Requires the .NET SDK/runtime.
 ### Native Binary (no .NET required)
 
 Every push to `production` publishes self-contained Native AOT binaries as GitHub Release assets
-— no .NET SDK or runtime needed on the target machine.
+- no .NET SDK or runtime needed on the target machine.
 
 ```bash
 # linux-x64
@@ -108,7 +108,7 @@ This creates a `.abcversion.json` configuration file at the repository root:
 }
 ```
 
-For a repository without multiple projects, you can trim this down to just `BaseVersion` — see
+For a repository without multiple projects, you can trim this down to just `BaseVersion` - see
 [Configuration](#configuration) below for what each section does.
 
 ### 2. Get version info
@@ -235,7 +235,7 @@ The patch number is derived from the commit count in the first-parent history.
 ```
 
 When on the `release/2.0` branch, versioning starts from `2.0.0` and counts commits since the
-specified parent SHA. Both `Version` and `ParentSha` are required for any branch listed here —
+specified parent SHA. Both `Version` and `ParentSha` are required for any branch listed here -
 omitting or nulling either one raises a clear config error rather than being treated as "no start
 point".
 
@@ -301,7 +301,7 @@ steps:
 ## How It Works
 
 1. Reads `BaseVersion` from `.abcversion.json`
-2. Checks if the current commit SHA matches a snapshot — if so, uses that exact version
+2. Checks if the current commit SHA matches a snapshot - if so, uses that exact version
 3. Checks if the current branch has specific configuration with a start point (parent SHA)
 4. Counts first-parent commits (optionally scoped to a path for multi-project setups)
 5. Derives the patch number from the commit count

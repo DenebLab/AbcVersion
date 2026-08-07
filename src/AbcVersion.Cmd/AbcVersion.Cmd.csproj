@@ -19,9 +19,15 @@
 	  <Description>abcversion dotnet tool — calculates semantic versions from Git repository state for use in builds and CI. Also available as a self-contained native binary.</Description>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageProjectUrl>https://github.com/deneblab/abcversion</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageTags>versioning;semver;git;build;dotnet-tool;continuous-integration</PackageTags>
 	  <RepositoryUrl>https://github.com/deneblab/abcversion</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
 		<PackageReference Include="ConsoleAppFramework" Version="5.5.0">

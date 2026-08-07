@@ -13,9 +13,15 @@
 	  <Description>Semantic versioning library for .NET that calculates versions from Git repository state (branch, first-parent commit count, SHA) using a .abcversion.json config.</Description>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageProjectUrl>https://github.com/deneblab/abcversion</PackageProjectUrl>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <PackageTags>versioning;semver;git;build;msbuild;continuous-integration</PackageTags>
 	  <RepositoryUrl>https://github.com/deneblab/abcversion</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
 

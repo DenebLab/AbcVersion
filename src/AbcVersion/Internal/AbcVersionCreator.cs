@@ -171,18 +171,31 @@ internal sealed class AbcVersionCreator
         return new AbcVersion(semVersion, data, options.DateTime);
     }
 
+    /// <summary>
+    ///     Resolves the repository root by searching upwards from, in order: the configured path,
+    ///     the current working directory, and the application root. Each candidate is searched
+    ///     upwards rather than matched exactly, so running from a subdirectory of a repository
+    ///     resolves correctly.
+    /// </summary>
+    /// <remarks>
+    ///     The current-directory candidate matters wherever the application root cannot lead back to
+    ///     the repository: a globally installed dotnet tool (whose app root is the install
+    ///     directory) and any process in a container (whose app root is a fixed path holding no
+    ///     .git). Previously only an exact match on the configured path was tried before falling
+    ///     back to the application root, so both cases failed with "Cannot find repository root".
+    /// </remarks>
     public static string GetRoot(SimpleEnvResult env, AbcVersionOptions options)
     {
-        if (IsGitRoot(options.PathToRepository)) return options.PathToRepository;
-        var r = FindGitDirectory(env.AppRoot);
-        return r;
+        return FindGitDirectory(AsDirectory(options.PathToRepository))
+               ?? FindGitDirectory(Directory.GetCurrentDirectory())
+               ?? FindGitDirectory(env.AppRoot);
 
 
-        bool IsGitRoot(string path)
+        // PathToRepository defaults to the process executable, which is a file, not a directory.
+        static string AsDirectory(string path)
         {
-            if (string.IsNullOrEmpty(path)) return false;
-            var gitPath = Path.Combine(path, ".git");
-            return Directory.Exists(gitPath);
+            if (string.IsNullOrEmpty(path)) return null;
+            return File.Exists(path) ? Path.GetDirectoryName(path) : path;
         }
 
         static string FindGitDirectory(string startPath)

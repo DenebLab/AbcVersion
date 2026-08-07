@@ -58,9 +58,18 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "Using version: $VERSION"
 
-    - name: Build native AOT binary
+    # Windows must use the PowerShell bootstrap. Running build.sh through Git Bash
+    # mangles MSBuild's /p: switch (the leading slash is stripped, so MSBuild reads
+    # "p:UseSharedCompilation=false" as a second project file and fails with MSB1008).
+    - name: Build native AOT binary (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: ./build.sh --target GithubRelease --rid ${{ matrix.rid }}
+
+    - name: Build native AOT binary (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: ./build.ps1 --target GithubRelease --rid ${{ matrix.rid }}
 
     - name: Stage release asset
       shell: bash

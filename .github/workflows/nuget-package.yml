@@ -46,8 +46,10 @@ jobs:
     
     - name: Build solution
       run: dotnet build src/AbcVersion/AbcVersion.csproj --configuration Release /p:TargetFramework=net8.0 /p:Version=${{ steps.get_version.outputs.version }}
+    # Must target the test project: running "dotnet test" against the library project is a no-op
+    # that always passes. No --no-restore here, since the steps above only restore the library.
     - name: Test
-      run: dotnet test src/AbcVersion/AbcVersion.csproj --no-restore --verbosity normal /p:TargetFramework=net8.0
+      run: dotnet test src/AbcVersion.Tests/AbcVersion.Tests.csproj --verbosity normal /p:TargetFramework=net8.0
     
     - name: Pack NuGet package
       if: github.event_name == 'push'

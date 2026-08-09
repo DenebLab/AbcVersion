@@ -4,7 +4,7 @@ using Deneblab.AbcVersion;
 using Helpers;
 using Fallout.Common;
 using Fallout.Common.IO;
-using Fallout.Common.ProjectModel;
+using Fallout.Solutions;
 using Fallout.Common.Tools.DotNet;
 using Fallout.Common.Utilities.Collections;
 using Serilog;

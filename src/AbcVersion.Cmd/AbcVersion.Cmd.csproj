@@ -29,8 +29,8 @@
     <None Include="..\..\NUGET.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="NLog.Extensions.Logging" Version="5.3.15" />
-		<PackageReference Include="ConsoleAppFramework" Version="5.5.0">
+		<PackageReference Include="NLog.Extensions.Logging" Version="6.1.4" />
+		<PackageReference Include="ConsoleAppFramework" Version="5.7.13">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

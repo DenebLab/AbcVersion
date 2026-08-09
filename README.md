@@ -28,6 +28,32 @@ Every push to `production` publishes self-contained Native AOT binaries as GitHu
 - no .NET SDK or runtime needed on the target machine.
 
 ```bash
+# Linux x86_64 and macOS arm64
+curl -sSL https://raw.githubusercontent.com/deneblab/abcversion/production/install.sh | sh
+```
+
+```powershell
+# Windows x64
+irm https://raw.githubusercontent.com/deneblab/abcversion/production/install.ps1 | iex
+```
+
+The installer picks the right binary for your platform, checks its SHA-256 against the checksum
+published alongside it, and installs to `~/.local/bin` (`%LOCALAPPDATA%\Programs\abcversion` on
+Windows). Both scripts accept `ABCVERSION_VERSION` to pin a release and `ABCVERSION_INSTALL_DIR` to
+choose the location.
+
+The published checksums guard against a corrupted or truncated download. They are fetched over the
+same channel as the binary, so they are not a defence against a compromised release; the assets are
+not signed.
+
+**Published platforms:** `linux-x64`, `osx-arm64`, `win-x64`. Intel macOS, `linux-arm64` and
+musl-based distributions (Alpine) are not built - the installer detects these and tells you rather
+than installing something that cannot run. Use `dotnet tool install` there instead.
+
+<details>
+<summary>Manual download</summary>
+
+```bash
 # linux-x64
 curl -fsSL -o abcversion \
   https://github.com/deneblab/abcversion/releases/latest/download/abcversion-linux-x64
@@ -41,11 +67,17 @@ Invoke-WebRequest -Uri https://github.com/deneblab/abcversion/releases/latest/do
 .\abcversion.exe -p semversion
 ```
 
+</details>
+
 ### Docker Build
 
+The binary is linked against glibc, so the stage that runs it must be a glibc image. Alpine and
+other musl distributions will not execute it.
+
 ```dockerfile
-FROM alpine:3.20 AS abcversion
-RUN apk add --no-cache curl && \
+FROM debian:12-slim AS abcversion
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \
+    rm -rf /var/lib/apt/lists/* && \
     curl -fsSL -o /usr/local/bin/abcversion \
       https://github.com/deneblab/abcversion/releases/latest/download/abcversion-linux-x64 && \
     chmod +x /usr/local/bin/abcversion

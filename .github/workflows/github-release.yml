@@ -26,6 +26,12 @@ jobs:
             rid: win-x64
             asset_name: abcversion-win-x64.exe
             output_name: Deneblab.AbcVersionCmd.exe
+          # macos-latest is Apple Silicon. Intel macOS is only available on the
+          # -intel/-large larger-runner labels, so osx-x64 is deliberately not built.
+          - os: macos-latest
+            rid: osx-arm64
+            asset_name: abcversion-osx-arm64
+            output_name: Deneblab.AbcVersionCmd
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -61,8 +67,8 @@ jobs:
     # Windows must use the PowerShell bootstrap. Running build.sh through Git Bash
     # mangles MSBuild's /p: switch (the leading slash is stripped, so MSBuild reads
     # "p:UseSharedCompilation=false" as a second project file and fails with MSB1008).
-    - name: Build native AOT binary (Linux)
-      if: runner.os == 'Linux'
+    - name: Build native AOT binary (Linux and macOS)
+      if: runner.os != 'Windows'
       shell: bash
       run: ./build.sh --target GithubRelease --rid ${{ matrix.rid }}
 
@@ -78,11 +84,28 @@ jobs:
         cp ".fallout/temp/w/AbcVersion.Cmd/github-release/${{ matrix.rid }}/${{ matrix.output_name }}" \
           "staging/${{ matrix.asset_name }}"
 
+    # Written in `sha256sum` format (digest, two spaces, bare filename) so that both
+    # `sha256sum -c` and macOS's `shasum -a 256 -c` verify it unmodified. Generated from
+    # inside staging/ so the recorded name has no directory component. macOS images have
+    # no sha256sum, hence the fallback.
+    - name: Generate checksum
+      shell: bash
+      working-directory: staging
+      run: |
+        if command -v sha256sum >/dev/null 2>&1; then
+          sha256sum "${{ matrix.asset_name }}" > "${{ matrix.asset_name }}.sha256"
+        else
+          shasum -a 256 "${{ matrix.asset_name }}" > "${{ matrix.asset_name }}.sha256"
+        fi
+        cat "${{ matrix.asset_name }}.sha256"
+
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.asset_name }}
-        path: staging/${{ matrix.asset_name }}
+        path: |
+          staging/${{ matrix.asset_name }}
+          staging/${{ matrix.asset_name }}.sha256
         if-no-files-found: error
 
   release:

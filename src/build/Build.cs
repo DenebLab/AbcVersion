@@ -122,7 +122,7 @@ class Build : FalloutBuild
     [Parameter("Runtime identifier for a single-RID native AOT publish (e.g. win-x64, linux-x64). If unset, builds all of NativeRuntimeIdentifiers.")]
     readonly string Rid;
 
-    IReadOnlyCollection<string> NativeRuntimeIdentifiers => ["win-x64", "linux-x64"];
+    IReadOnlyCollection<string> NativeRuntimeIdentifiers => ["win-x64", "linux-x64", "osx-arm64"];
 
     IReadOnlyCollection<string> RidsToPublish => string.IsNullOrWhiteSpace(Rid)
         ? NativeRuntimeIdentifiers

@@ -11,6 +11,14 @@ public class AbcVersionOptions
 {
     public DateTime DateTime { get; set; } = DateTime.UtcNow;
     public string PathToRepository { get; set; } = Environment.ProcessPath;
+
+    /// <summary>
+    ///     Optional subtree, relative to the repository root, that the commit count is narrowed to.
+    ///     Unlike <see cref="PathToRepository" /> — which only says which repository to read — this
+    ///     scopes the version itself, without needing a <c>Projects</c> entry in the configuration.
+    ///     Mutually exclusive with a named project.
+    /// </summary>
+    public string ScopePath { get; set; }
 }
 
 public static class AbcVersionFactory
@@ -31,6 +39,21 @@ public static class AbcVersionFactory
     public static AbcVersion CreateAbcVersion(string projectNameFromConfig = AbcVersionConsts.MAIN_PROJECT_MARKER)
     {
         return new AbcVersionBuilder(_instance).Build(projectNameFromConfig);
+    }
+
+    /// <summary>
+    ///     Resolves the repository root the same way a version calculation would, searching upwards
+    ///     from <paramref name="path" />. Returns <c>null</c> when no repository is found.
+    /// </summary>
+    /// <remarks>
+    ///     Exists so that callers reporting on a calculation — diagnostics, error messages listing
+    ///     configured projects — can read the configuration from the same place the calculation did,
+    ///     instead of re-implementing the search and drifting away from it.
+    /// </remarks>
+    public static string ResolveRepositoryRoot(string path)
+    {
+        var options = new AbcVersionOptions { PathToRepository = path };
+        return AbcVersionCreator.GetRoot(AbcVersionBuilder._env, options);
     }
 
     internal class Holder<T> where T : class
@@ -73,6 +96,17 @@ public static class AbcVersionFactory
         {
             if (_holder.IsSet) return this;
             _options.PathToRepository = path;
+            return this;
+        }
+
+        /// <summary>
+        ///     Narrows the commit count to a subtree of the repository, resolved from the repository
+        ///     root. Cannot be combined with a named project.
+        /// </summary>
+        public AbcVersionBuilder SetScope(string scopePath)
+        {
+            if (_holder.IsSet) return this;
+            _options.ScopePath = scopePath;
             return this;
         }
 

@@ -126,6 +126,7 @@ internal class Program
         Console.WriteLine("       abcversion");
         Console.WriteLine("       abcversion --path ./my-repo");
         Console.WriteLine("       abcversion --project MyLib");
+        Console.WriteLine("       abcversion --scope src/MyLib");
         Console.WriteLine("       abcversion -p semversion");
         Console.WriteLine("  init         Initialize .abcversion.json in current git repository");
         Console.WriteLine();
@@ -138,6 +139,7 @@ internal class Program
         Console.WriteLine("       abcversion info");
         Console.WriteLine("       abcversion info --path ./my-repo");
         Console.WriteLine("       abcversion info --project MyLib");
+        Console.WriteLine("       abcversion info --scope src/MyLib");
         Console.WriteLine("  projects     List configured projects from .abcversion.json");
         Console.WriteLine();
         Console.WriteLine("     Examples:");
@@ -145,8 +147,13 @@ internal class Program
         Console.WriteLine("       abcversion projects --path ./my-repo");
         Console.WriteLine();
         Console.WriteLine("Options:");
-        Console.WriteLine("  --path <path>        Path to git repository (default: current directory)");
+        Console.WriteLine("  --path <path>        Which repository to read (default: current directory).");
+        Console.WriteLine("                       A locator, not a filter: naming a subdirectory still");
+        Console.WriteLine("                       versions the whole repository. Use --scope to narrow.");
         Console.WriteLine("  --project <name>     Project name from .abcversion.json (default: main)");
+        Console.WriteLine("  --scope <subdir>     Narrow the commit count to a subdirectory, without a");
+        Console.WriteLine("                       .abcversion.json entry. Relative to the repository");
+        Console.WriteLine("                       root. Cannot be combined with --project.");
         Console.WriteLine("  -p, --property <name>  Get only one property (e.g. semversion, gitsha)");
         Console.WriteLine("  --version            Show version");
         Console.WriteLine("  -h, --help           Show this help");
@@ -274,14 +281,17 @@ internal class Program
                 Console.WriteLine("Usage: abcversion info [options]");
                 Console.WriteLine();
                 Console.WriteLine("Options:");
-                Console.WriteLine("  --path <path>      Path to git repository (default: current directory)");
+                Console.WriteLine("  --path <path>      Which repository to read (a locator, not a filter)");
                 Console.WriteLine("  --project <name>   Project name from .abcversion.json (default: main)");
+                Console.WriteLine("  --scope <subdir>   Narrow the commit count to a subdirectory of the");
+                Console.WriteLine("                     repository root. Cannot be combined with --project.");
                 Console.WriteLine("  -h, --help         Show this help");
                 Console.WriteLine();
                 Console.WriteLine("Examples:");
                 Console.WriteLine("  abcversion info");
                 Console.WriteLine("  abcversion info --path ./my-repo");
                 Console.WriteLine("  abcversion info --project MyLib");
+                Console.WriteLine("  abcversion info --scope src/MyLib");
                 break;
             case "projects":
                 Console.WriteLine("List configured projects from .abcversion.json");
@@ -289,7 +299,7 @@ internal class Program
                 Console.WriteLine("Usage: abcversion projects [options]");
                 Console.WriteLine();
                 Console.WriteLine("Options:");
-                Console.WriteLine("  --path <path>      Path to git repository (default: current directory)");
+                Console.WriteLine("  --path <path>      Which repository to read (a locator, not a filter)");
                 Console.WriteLine("  -h, --help         Show this help");
                 Console.WriteLine();
                 Console.WriteLine("Examples:");

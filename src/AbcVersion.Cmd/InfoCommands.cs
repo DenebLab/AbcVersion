@@ -12,26 +12,35 @@ internal class InfoCommands
     /// <param name="cancellationToken"></param>
     /// <param name="path">Path to git directory with configuration file (.abcversion.json)</param>
     /// <param name="project">Project name from configuration file (.abcversion.json)</param>
+    /// <param name="scope">Subdirectory (from the repository root) to narrow the commit count to</param>
     [Command("")]
     public void Root(
         CancellationToken cancellationToken,
         string path = default,
-        string project = default
+        string project = default,
+        string scope = default
     )
     {
         path = string.IsNullOrEmpty(path) ? Directory.GetCurrentDirectory() : path;
         project = string.IsNullOrEmpty(project) ? "." : project;
 
-        var configPath = Path.Combine(path, ".abcversion.json");
-        var configExists = File.Exists(configPath);
+        ScopeGuard.RejectScopeWithProject(scope, project);
 
         var abcVersion = AbcVersionFactory
             .CreateBuilder()
             .SetRepositoryRoot(path)
+            .SetScope(scope)
             .Build(project);
 
-        Console.WriteLine($"Repository:    {Path.GetFullPath(path)}");
-        Console.WriteLine($"Config:        {(configExists ? configPath : "(not found)")}");
+        // Reported from what the calculation resolved, not from the path passed in: the two differ
+        // whenever --path names a subdirectory, and reporting the argument claimed there was no
+        // configuration while its BaseVersion was in use.
+        var repositoryRoot = abcVersion.RepositoryRoot ?? Path.GetFullPath(path);
+        var configPath = abcVersion.ConfigPath;
+        var configExists = configPath != null;
+
+        Console.WriteLine($"Repository:    {repositoryRoot}");
+        Console.WriteLine($"Config:        {configPath ?? "(not found)"}");
         Console.WriteLine($"Branch:        {abcVersion.GitBranch}");
         Console.WriteLine($"Git SHA:       {abcVersion.GitSha}");
         Console.WriteLine($"SemVersion:    {abcVersion.SemVersion}");
@@ -47,10 +56,13 @@ internal class InfoCommands
         Console.WriteLine($"Machine:       {abcVersion.Machine}");
         Console.WriteLine($"DateTime:      {abcVersion.DateTime:s}Z");
 
+        if (string.IsNullOrEmpty(scope) == false)
+            Console.WriteLine($"Scope:         {scope}");
+
         if (project != ".")
         {
             Console.WriteLine($"Project:       {project}");
-            var config = ConfigReader.Read(path);
+            var config = ConfigReader.Read(repositoryRoot);
             if (config?.Projects != null && config.Projects.TryGetValue(project, out var proj))
             {
                 Console.WriteLine($"ProjectPath:   {proj.Path ?? "."}");
@@ -59,7 +71,7 @@ internal class InfoCommands
         }
         else if (configExists)
         {
-            var config = ConfigReader.Read(path);
+            var config = ConfigReader.Read(repositoryRoot);
             if (config != null)
                 Console.WriteLine($"BaseVersion:   {config.BaseVersion ?? "(not set)"}");
         }

@@ -165,10 +165,34 @@ abcversion [options]
 
 | Option | Description |
 |--------|-------------|
-| `--path <path>` | Path to git repository (defaults to current directory) |
+| `--path <path>` | Which repository to read (defaults to current directory). A locator, **not** a filter - see below |
 | `--project <name>` | Project name from config (defaults to main project) |
+| `--scope <subdir>` | Narrow the commit count to a subdirectory, without a config entry. Cannot be combined with `--project` |
 | `-p, --property <name>` | Return a single property instead of full JSON |
 | `--version` | Display tool version |
+
+#### `--path` selects a repository, `--project` and `--scope` narrow it
+
+These are independent axes. `--path` answers *which repository*; `--project` and `--scope` answer
+*which part of it*. Pointing `--path` at a subdirectory does not filter anything - it still returns
+the version for the whole repository:
+
+```bash
+abcversion -p semversion                       # 1.2.17  (whole repository)
+abcversion -p semversion --path src            # 1.2.17  (same - --path is not a filter)
+abcversion -p semversion --scope src           # 1.2.10  (commits touching src/)
+```
+
+They compose, which is the point of `--path`: driving a repository you are not standing in.
+
+```bash
+abcversion --path /builds/my-repo --scope src/Api -p semversion
+```
+
+Use `--project` when a subtree deserves a name and its own `BaseVersion` in the config; use
+`--scope` for a one-off, or when you would rather not add an entry per directory. A `--scope` that
+matches no commits is an error rather than a version, so a typo cannot ship as a real-looking
+number. Scope paths are resolved from the repository root, the same way `Projects[].Path` is.
 
 ### Subcommands
 
@@ -178,6 +202,7 @@ abcversion init --force     # Overwrite existing config
 
 abcversion info             # Show diagnostic info about version resolution
 abcversion info --path ./my-repo
+abcversion info --scope src/Api
 
 abcversion projects         # List configured projects from .abcversion.json
 ```
@@ -236,6 +261,19 @@ var version = AbcVersionFactory
     .CreateBuilder()
     .SetRepositoryRoot(@"C:\my-repo")
     .Build("my-project");
+```
+
+Or scope to a subdirectory with no config entry - the equivalent of `--scope`:
+
+```csharp
+var version = AbcVersionFactory
+    .CreateBuilder()
+    .SetRepositoryRoot(@"C:\my-repo")
+    .SetScope("src/Api")
+    .Build();
+
+Console.WriteLine(version.RepositoryRoot);  // root the search resolved to
+Console.WriteLine(version.ConfigPath);      // config actually used, or null
 ```
 
 ## Configuration
@@ -305,6 +343,10 @@ Pin specific commits to exact versions:
 ```
 
 Each project tracks commits only within its configured path.
+
+To version a directory without giving it an entry here, use `--scope src/Api` instead. An entry is
+worth adding when the subtree needs its own `BaseVersion` or branch start points; `--scope` covers
+the rest and keeps "add a directory" from meaning "and update the config".
 
 ## CI/CD Integration
 

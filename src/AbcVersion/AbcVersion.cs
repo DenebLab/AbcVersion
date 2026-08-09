@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 
 
@@ -18,7 +19,12 @@ public class AbcVersion
     }
 
 
-    public AbcVersion(SemVersion sem, Internal.AbcVersionGitData data, DateTime dateTime)
+    public AbcVersion(
+        SemVersion sem,
+        Internal.AbcVersionGitData data,
+        DateTime dateTime,
+        string repositoryRoot = null,
+        string configPath = null)
     {
         Major = sem.Major;
         Minor = sem.Minor;
@@ -30,7 +36,8 @@ public class AbcVersion
         Meta = sem.Meta;
         PreRelease = sem.PreRelease;
         VersionString = sem.VersionString;
-
+        RepositoryRoot = repositoryRoot;
+        ConfigPath = configPath;
     }
     public AbcVersion(ILogger log)
     {
@@ -67,6 +74,28 @@ public class AbcVersion
                                         $"Sha.{GitSha}.";
 
     public string InformationalVersion => $"{SemVersion}+{ShortBuildMetaData}";
+
+    /// <summary>
+    ///     The repository root actually resolved for this calculation, after searching upwards from
+    ///     the configured path. Callers pass a path that may sit below the root, so this is the only
+    ///     reliable answer to "which repository produced this version".
+    /// </summary>
+    /// <remarks>
+    ///     Deliberately excluded from serialization: this is an absolute machine path, and the
+    ///     command line tool emits the serialized form as its default output. Publishing it would
+    ///     put build agent filesystem paths into CI logs and anything embedding that JSON.
+    /// </remarks>
+    [JsonIgnore]
+    public string RepositoryRoot { get; }
+
+    /// <summary>
+    ///     Full path to the <c>.abcversion.json</c> that was used, or <c>null</c> when none exists
+    ///     and the defaults applied. Resolved against <see cref="RepositoryRoot" />, not against the
+    ///     path the caller supplied.
+    /// </summary>
+    /// <remarks>Excluded from serialization for the same reason as <see cref="RepositoryRoot" />.</remarks>
+    [JsonIgnore]
+    public string ConfigPath { get; }
 
 
     public class AbcVersionGitData(

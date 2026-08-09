@@ -65,9 +65,6 @@ public class AbcVersion
     public string SemVersion => $"{Major}.{Minor}.{Patch}";
 
 
-    public string AssemblyVersion => $"{Major}.0.0.0";
-    public string FileVersion => $"{Major}.{Minor}.{Patch}.0";
-
     public string ShortBuildMetaData => $"Branch.{GitBranch}." +
                                         $"DateTime.{DateTime:s}Z." +
                                         $"Machine.{Machine}." +

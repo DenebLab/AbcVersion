@@ -220,8 +220,6 @@ When using `-p`, you can request any of these properties:
 | `Patch` | `5` | Patch version (derived from commit count) |
 | `PreRelease` | `alpha` | Pre-release label |
 | `Meta` | `build.456` | Build metadata |
-| `AssemblyVersion` | `1.0.0.0` | .NET assembly version |
-| `FileVersion` | `1.1.5.0` | File version |
 | `InformationalVersion` | `1.1.5+Branch.main...` | Full informational version |
 | `ShortBuildMetaData` | `Branch.main.DateTime...` | Build metadata string (without the leading version) |
 | `GitSha` | `a1b2c3d4...` | Current commit SHA |
@@ -247,7 +245,6 @@ var version = AbcVersionFactory
     .Build();
 
 Console.WriteLine(version.SemVersion);           // "1.1.5"
-Console.WriteLine(version.AssemblyVersion);       // "1.0.0.0"
 Console.WriteLine(version.InformationalVersion);  // "1.1.5+Branch.main.DateTime..."
 Console.WriteLine(version.GitSha);               // "a1b2c3d4..."
 ```

@@ -51,8 +51,6 @@ internal class InfoCommands
         if (!string.IsNullOrEmpty(abcVersion.PreRelease))
             Console.WriteLine($"PreRelease:    {abcVersion.PreRelease}");
 
-        Console.WriteLine($"Assembly:      {abcVersion.AssemblyVersion}");
-        Console.WriteLine($"File:          {abcVersion.FileVersion}");
         Console.WriteLine($"Machine:       {abcVersion.Machine}");
         Console.WriteLine($"DateTime:      {abcVersion.DateTime:s}Z");
 

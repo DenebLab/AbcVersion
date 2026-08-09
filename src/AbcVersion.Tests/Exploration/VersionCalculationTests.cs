@@ -65,8 +65,6 @@ public class VersionCalculationTests
 
         Assert.Equal($"{version.Major}.{version.Minor}.{version.Patch}", version.SemVersion);
         Assert.Matches(@"^\d+\.\d+\.\d+$", version.SemVersion);
-        Assert.Equal($"{version.Major}.0.0.0", version.AssemblyVersion);
-        Assert.Equal($"{version.Major}.{version.Minor}.{version.Patch}.0", version.FileVersion);
     }
 
     [Fact]
